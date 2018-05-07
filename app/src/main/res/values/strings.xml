@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Attractive Wine 2</string>
+    <string name="download_done">Finish DL</string>
+    <string name="notification_desc">You have download all the beers ! GG</string>
 </resources>
