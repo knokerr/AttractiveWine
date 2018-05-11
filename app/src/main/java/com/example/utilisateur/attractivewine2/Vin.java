@@ -20,6 +20,21 @@ import static android.content.ContentValues.TAG;
 
 public class Vin extends IntentService {
     private static final String ACTION_get_All_wine = "com.example.utilisateur.attractivewine2.action.Beers";
+    private static String URLbase = "https://www.thecocktaildb.com/api/json/v1/1/";
+    private static String []Refs = {      "search.php?s="   //0 //+cocktail name : return recipe
+                                        , "search.php?i="   //1 //+ingredient : return ingredient description
+                                        , "lookup.php?i="   //2 //+id : return a precise recipe
+                                        , "filter.php?i="   //3 //+ingredient : return all cocktails containing those ingredients
+
+                                        , "filter.php?a=Alcoholic"          //4 //+category : return all cocktails in this category
+                                        , "filter.php?a=Non_Alcoholic"      //5 //+category : return all cocktails in this category
+                                        , "filter.php?a=Optional_alcohol"   //6 //+category : return all cocktails in this category
+
+                                        , "filter.php?c="   //7 //+Category : return all the cocktails in this category
+                                        , "list.php?c="     //8 //get all categories
+                                        , "list.php?i="     //9 //get all ingredients
+                                        , "list.php?g="     //10//get all glass types
+                                        , "random.php" };   //11//get a random cocktail
 
 
 
@@ -37,7 +52,6 @@ public class Vin extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.i(TAG, "C'est moiiiii !!");
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_get_All_wine.equals(action)) {
@@ -50,16 +64,17 @@ public class Vin extends IntentService {
 
     private void handleActionWine() {
         Log.d(TAG, "Thread service name: " + Thread.currentThread().getName());
-        URL url = null;
-
         try{
-            url = new URL("http://binouze.fabrigli.fr/bieres.json");
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.connect();
-            if(HttpURLConnection.HTTP_OK == conn.getResponseCode()){
-                copyInputStreamToFile(conn.getInputStream(),
-                                        new File(getCacheDir(), "bieres.json"));
-                Log.d(TAG, "Bieres json downloaded");
+            for(int i=0; i<3; i++)
+            {
+                URL url = new URL( URLbase + Refs[4+i] );
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.connect();
+                if(HttpURLConnection.HTTP_OK == conn.getResponseCode()){
+                    File f = new File(getCacheDir(), i+"cocktailArray.json");
+                    copyInputStreamToFile(conn.getInputStream(), f );
+                    Log.d(TAG,  i + " cocktail list json downloaded");
+                }
             }
         }
         catch(MalformedURLException e){
@@ -72,7 +87,7 @@ public class Vin extends IntentService {
 
     private void copyInputStreamToFile(InputStream in, File file){
         try {
-            OutputStream out = new FileOutputStream(file);
+            OutputStream out = new FileOutputStream(file, true);
             byte[] buf = new byte[1024];
             int lenght;
             while ((lenght = in.read(buf)) > 0) {
